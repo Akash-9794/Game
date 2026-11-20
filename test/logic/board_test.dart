@@ -115,4 +115,23 @@ void main() {
     expect(cols, isEmpty);
     expect(b.isFilled(0, 6), isFalse);
   });
+
+  test('target gems are counted when their line clears', () {
+    final b = Board();
+    b.addTarget(0, 8, 3);
+    expect(b.targetCount, 1);
+    expect(b.isTarget(0, 8), isTrue);
+    b.place(row3, 0, 0);
+    b.place(row3, 0, 3);
+    final r = b.place(const Shape([(0, 0), (0, 1)]), 0, 6);
+    expect(r.clearedTargets, 1);
+    expect(b.targetCount, 0);
+    expect(b.isFilled(0, 8), isFalse);
+  });
+
+  test('addTarget refuses a filled cell', () {
+    final b = Board();
+    b.place(single, 1, 1);
+    expect(() => b.addTarget(1, 1, 0), throwsArgumentError);
+  });
 }

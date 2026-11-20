@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 
-import '../logic/classic_game.dart';
+import '../logic/tray_game.dart';
 import 'gem_grid_game.dart';
 import 'gem_painter.dart';
 
@@ -51,7 +51,7 @@ class PieceComponent extends PositionComponent
   @override
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
-    if (game.logic.isGameOver) return;
+    if (game.logic.isOver) return;
     _dragging = true;
     _pointer = event.canvasPosition.clone();
     priority = 100;

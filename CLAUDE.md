@@ -30,24 +30,46 @@ The Flutter project lives at the repository root (package name `gem_grid`). Port
 
 ## Layout
 ```
-lib/main.dart                     App entry: locks portrait, shows the Flame GameWidget
-lib/logic/shape.dart              Shape + list of all dealable shapes (pure Dart)
-lib/logic/board.dart              9x9 board, placement, line clears, combo scoring (pure Dart)
-lib/logic/classic_game.dart       Classic mode: tray of 3 pieces, dealing, game over (pure Dart)
-lib/game/gem_grid_game.dart       FlameGame: layout, HUD, connects input to ClassicGame
-lib/game/board_component.dart     Draws the board, drag preview and clear animation
-lib/game/piece_component.dart     Draggable tray piece
-lib/game/floating_text.dart       "+40" / "Combo x2" popups
-lib/game/gem_painter.dart         Gem colours and block drawing
-lib/ui/game_over_overlay.dart     Flutter "No more moves / Play again" screen
-lib/services/best_score_store.dart  Saves best score (shared_preferences)
-test/logic/                       Unit tests for all logic classes
-.github/workflows/build.yml       CI: test, Android APK, web deploy to GitHub Pages
+lib/main.dart                       App entry: locks portrait, loads saved data, starts the app
+lib/logic/                          PURE DART RULES (no Flutter/Flame imports)
+  shape.dart                        Shape + list of all dealable shapes
+  board.dart                        9x9 board, placement, line clears, combo scoring, target gems
+  tray_game.dart                    Shared rules: tray of 3 pieces, dealing, "no moves left"
+  classic_game.dart                 Classic mode (endless, game over when nothing fits)
+  adventure_game.dart               Adventure mode: goals, move limit, win/lose, 1-3 stars
+  levels.dart                       The 30 Adventure levels (fixed formula + seed)
+  adventure_progress.dart           Unlocked levels + stars, save/load format
+lib/game/                           FLAME RENDERING (board + tray only, no rules)
+  gem_grid_game.dart                FlameGame: layout, drag handling, calls the logic
+  board_component.dart              Draws board, target gems, drag preview, clear animation
+  piece_component.dart              Draggable tray piece
+  floating_text.dart                "+40" / "Combo x2" popups
+  gem_painter.dart                  Colours, gem block and diamond drawing
+lib/ui/                             FLUTTER SCREENS
+  app.dart                          MaterialApp + dark theme
+  home_screen.dart                  Title, Classic / Adventure buttons, How to play, Settings
+  level_select_screen.dart          30-level grid with stars and locks
+  game_screen.dart                  Score bar + Flame game + panels (intro, pause, game over,
+                                    level complete, level failed); Android back = pause
+  settings_screen.dart              Vibration toggle, reset progress, version
+  how_to_play_screen.dart           Rules explained
+  widgets.dart                      Shared widgets (buttons, stars, gem icons, header)
+lib/services/game_storage.dart      Saves best score, Adventure stars, settings (shared_preferences)
+test/logic/                         Unit tests for every logic class (incl. a bot that proves
+                                    every level is winnable)
+test/ui/                            Widget tests for the screens and a full win/lose flow
+test/game/                          Flame game smoke test
+.github/workflows/build.yml         CI: test, Android APK, web deploy to GitHub Pages
 ```
 
 ## Status
-- Done: Classic mode (drag & drop, clears, combo scoring, game over, best score).
-- Next: main menu + mode select, Adventure mode, sounds, AdMob.
+- Done: Home, Classic, Adventure (30 levels, stars, unlocks), level select, pause,
+  game over / level complete / level failed panels, settings, how to play, saved progress.
+- Next: sounds, AdMob (banner, interstitial, rewarded continue), app icon.
+
+## Notes
+- If you change level formulas in `levels.dart`, run `flutter test test/logic/levels_test.dart`:
+  it prints the bot's win rate per level and fails if any level is impossible.
 
 ## Commands
 - `flutter test` — run all tests (must pass before pushing)
