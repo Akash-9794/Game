@@ -30,12 +30,24 @@ The Flutter project lives at the repository root (package name `gem_grid`). Port
 
 ## Layout
 ```
-lib/main.dart                 App entry: locks portrait, shows the Flame GameWidget
-lib/game/gem_grid_game.dart   FlameGame (rendering only)
-lib/logic/board.dart          9x9 board, placement, line clears, combo scoring
-test/logic/board_test.dart    Unit tests for the board
-.github/workflows/build.yml   CI: test, Android APK, web deploy to GitHub Pages
+lib/main.dart                     App entry: locks portrait, shows the Flame GameWidget
+lib/logic/shape.dart              Shape + list of all dealable shapes (pure Dart)
+lib/logic/board.dart              9x9 board, placement, line clears, combo scoring (pure Dart)
+lib/logic/classic_game.dart       Classic mode: tray of 3 pieces, dealing, game over (pure Dart)
+lib/game/gem_grid_game.dart       FlameGame: layout, HUD, connects input to ClassicGame
+lib/game/board_component.dart     Draws the board, drag preview and clear animation
+lib/game/piece_component.dart     Draggable tray piece
+lib/game/floating_text.dart       "+40" / "Combo x2" popups
+lib/game/gem_painter.dart         Gem colours and block drawing
+lib/ui/game_over_overlay.dart     Flutter "No more moves / Play again" screen
+lib/services/best_score_store.dart  Saves best score (shared_preferences)
+test/logic/                       Unit tests for all logic classes
+.github/workflows/build.yml       CI: test, Android APK, web deploy to GitHub Pages
 ```
+
+## Status
+- Done: Classic mode (drag & drop, clears, combo scoring, game over, best score).
+- Next: main menu + mode select, Adventure mode, sounds, AdMob.
 
 ## Commands
 - `flutter test` — run all tests (must pass before pushing)

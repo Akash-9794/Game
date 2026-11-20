@@ -85,4 +85,34 @@ void main() {
     expect(b.fitsAnywhere(row3), isFalse);
     expect(b.fitsAnywhere(single), isTrue);
   });
+
+  test('clearing 2 lines at once scores 10 x 2 x 2', () {
+    final b = Board();
+    // Fill row 0 and column 0 except the corner (0,0).
+    for (var i = 1; i < Board.size; i++) {
+      b.place(single, 0, i);
+      b.place(single, i, 0);
+    }
+    final result = b.place(single, 0, 0);
+    expect(result.clearedRows, [0]);
+    expect(result.clearedCols, [0]);
+    expect(result.pointsGained, 1 + 10 * 2 * 2);
+  });
+
+  test('placed cells remember their gem colour', () {
+    final b = Board();
+    b.place(row3, 2, 2, gem: 5);
+    expect(b.gemAt(2, 3), 5);
+    expect(b.gemAt(3, 3), isNull);
+  });
+
+  test('linesCompletedBy previews clears without changing the board', () {
+    final b = Board();
+    b.place(row3, 0, 0);
+    b.place(row3, 0, 3);
+    final (rows, cols) = b.linesCompletedBy(row3, 0, 6);
+    expect(rows, [0]);
+    expect(cols, isEmpty);
+    expect(b.isFilled(0, 6), isFalse);
+  });
 }

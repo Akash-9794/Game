@@ -1,76 +1,105 @@
 // Pure Dart game logic — no Flutter or Flame imports allowed in lib/logic/.
 
-/// A shape is a list of (row, col) cells relative to its top-left corner.
-class Shape {
-  final List<(int, int)> cells;
-  const Shape(this.cells);
-}
+import 'shape.dart';
+
+export 'shape.dart';
 
 /// What happened after placing a shape.
 class PlaceResult {
-  final int clearedLines;
+  final List<int> clearedRows;
+  final List<int> clearedCols;
   final int pointsGained;
-  const PlaceResult(this.clearedLines, this.pointsGained);
+  final int combo;
+
+  const PlaceResult({
+    required this.clearedRows,
+    required this.clearedCols,
+    required this.pointsGained,
+    required this.combo,
+  });
+
+  int get clearedLines => clearedRows.length + clearedCols.length;
 }
 
-/// The 9x9 board. `true` means the cell is filled.
+/// The 9x9 board. Each cell is empty (null) or holds a gem colour number.
 class Board {
   static const int size = 9;
 
-  final List<List<bool>> _cells =
-      List.generate(size, (_) => List.filled(size, false));
+  final List<List<int?>> _cells =
+      List.generate(size, (_) => List<int?>.filled(size, null));
 
   int score = 0;
 
   /// How many placements in a row have cleared at least one line.
   int combo = 0;
 
-  bool isFilled(int row, int col) => _cells[row][col];
+  bool isFilled(int row, int col) => _cells[row][col] != null;
+
+  /// The gem colour at a cell, or null if empty.
+  int? gemAt(int row, int col) => _cells[row][col];
 
   bool canPlace(Shape shape, int row, int col) {
     for (final (r, c) in shape.cells) {
       final rr = row + r, cc = col + c;
       if (rr < 0 || rr >= size || cc < 0 || cc >= size) return false;
-      if (_cells[rr][cc]) return false;
+      if (_cells[rr][cc] != null) return false;
     }
     return true;
   }
 
+  /// Rows and columns that would be full if [shape] were placed at
+  /// ([row], [col]). Used to preview clears while dragging.
+  (List<int>, List<int>) linesCompletedBy(Shape shape, int row, int col) {
+    if (!canPlace(shape, row, col)) return (const [], const []);
+    final added = {for (final (r, c) in shape.cells) (row + r, col + c)};
+    bool filled(int r, int c) => _cells[r][c] != null || added.contains((r, c));
+    return (
+      [
+        for (var r = 0; r < size; r++)
+          if (List.generate(size, (c) => filled(r, c)).every((f) => f)) r,
+      ],
+      [
+        for (var c = 0; c < size; c++)
+          if (List.generate(size, (r) => filled(r, c)).every((f) => f)) c,
+      ],
+    );
+  }
+
   /// Places [shape] with its top-left at ([row], [col]), clears full rows
   /// and columns, and updates score and combo.
-  PlaceResult place(Shape shape, int row, int col) {
+  ///
+  /// Scoring: 1 point per block placed, plus 10 × lines² for the lines
+  /// cleared (1 line = 10, 2 = 40, 3 = 90 …), multiplied by the combo streak.
+  PlaceResult place(Shape shape, int row, int col, {int gem = 0}) {
     if (!canPlace(shape, row, col)) {
       throw ArgumentError('Shape does not fit at ($row, $col)');
     }
+    final (fullRows, fullCols) = linesCompletedBy(shape, row, col);
     for (final (r, c) in shape.cells) {
-      _cells[row + r][col + c] = true;
+      _cells[row + r][col + c] = gem;
     }
-
-    final fullRows = [
-      for (var r = 0; r < size; r++)
-        if (_cells[r].every((f) => f)) r,
-    ];
-    final fullCols = [
-      for (var c = 0; c < size; c++)
-        if (List.generate(size, (r) => _cells[r][c]).every((f) => f)) c,
-    ];
     for (final r in fullRows) {
       for (var c = 0; c < size; c++) {
-        _cells[r][c] = false;
+        _cells[r][c] = null;
       }
     }
     for (final c in fullCols) {
       for (var r = 0; r < size; r++) {
-        _cells[r][c] = false;
+        _cells[r][c] = null;
       }
     }
 
     final lines = fullRows.length + fullCols.length;
     combo = lines > 0 ? combo + 1 : 0;
-    // 1 point per cell placed, 10 per line, multiplied by the combo streak.
-    final points = shape.cells.length + lines * 10 * (combo == 0 ? 1 : combo);
+    final points =
+        shape.cells.length + (lines == 0 ? 0 : 10 * lines * lines * combo);
     score += points;
-    return PlaceResult(lines, points);
+    return PlaceResult(
+      clearedRows: fullRows,
+      clearedCols: fullCols,
+      pointsGained: points,
+      combo: combo,
+    );
   }
 
   /// True if [shape] fits anywhere on the board.
