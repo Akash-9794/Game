@@ -9,6 +9,7 @@ import '../game/gem_painter.dart';
 import '../logic/adventure_game.dart';
 import '../logic/classic_game.dart';
 import '../services/game_storage.dart';
+import '../services/sound_service.dart';
 import 'widgets.dart';
 
 enum _Panel { none, intro, paused, gameOver, levelWon, levelLost }
@@ -55,6 +56,11 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _onMove(PlaceResult result) {
+    SoundService.instance.play(result.clearedLines == 0
+        ? Sfx.place
+        : result.combo > 1
+            ? Sfx.combo
+            : Sfx.clear);
     if (_storage.haptics) {
       if (result.clearedLines > 0) {
         HapticFeedback.mediumImpact();
@@ -72,19 +78,25 @@ class _GameScreenState extends State<GameScreen> {
       // Let the last clear animation play before showing the result.
       _endTimer = Timer(const Duration(milliseconds: 700), () {
         if (!mounted) return;
-        setState(() {
-          _panel = !_isAdventure
-              ? _Panel.gameOver
-              : _adventure.status == LevelStatus.won
-                  ? _Panel.levelWon
-                  : _Panel.levelLost;
+        final panel = !_isAdventure
+            ? _Panel.gameOver
+            : _adventure.status == LevelStatus.won
+                ? _Panel.levelWon
+                : _Panel.levelLost;
+        SoundService.instance.play(switch (panel) {
+          _Panel.levelWon => Sfx.win,
+          _Panel.levelLost => Sfx.lose,
+          _ => Sfx.gameOver,
         });
+        if (_storage.haptics) HapticFeedback.heavyImpact();
+        setState(() => _panel = panel);
       });
     }
   }
 
   void _pause() {
     if (_panel != _Panel.none || _logic.isOver) return;
+    SoundService.instance.play(Sfx.tap);
     _game.pauseEngine();
     setState(() => _panel = _Panel.paused);
   }

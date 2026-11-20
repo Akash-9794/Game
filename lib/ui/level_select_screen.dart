@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../game/gem_painter.dart';
 import '../logic/levels.dart';
 import '../services/game_storage.dart';
+import '../services/sound_service.dart';
 import 'game_screen.dart';
 import 'widgets.dart';
 
@@ -18,6 +19,7 @@ class LevelSelectScreen extends StatefulWidget {
 
 class _LevelSelectScreenState extends State<LevelSelectScreen> {
   Future<void> _play(Level level) async {
+    SoundService.instance.play(Sfx.tap);
     await Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => GameScreen.adventure(
             storage: widget.storage, level: level)));

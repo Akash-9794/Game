@@ -55,6 +55,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 8),
               _Card(children: [
                 SwitchListTile(
+                  title: const Text('Sound effects'),
+                  value: s.sound,
+                  activeThumbColor: GemPalette.gems[3],
+                  onChanged: (v) => setState(() => s.setSound(v)),
+                ),
+                SwitchListTile(
                   title: const Text('Vibration'),
                   subtitle: const Text('Buzz when you place pieces and clear lines'),
                   value: s.haptics,

@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../game/gem_painter.dart';
 import '../services/game_storage.dart';
+import '../services/sound_service.dart';
 import 'game_screen.dart';
 import 'how_to_play_screen.dart';
 import 'level_select_screen.dart';
@@ -72,14 +73,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   spacing: 12,
                   children: [
                     TextButton.icon(
-                      onPressed: () => _open(const HowToPlayScreen()),
+                      onPressed: () {
+                        SoundService.instance.play(Sfx.tap);
+                        _open(const HowToPlayScreen());
+                      },
                       icon: const Icon(Icons.help_outline_rounded),
                       label: const Text('How to play'),
                       style: TextButton.styleFrom(
                           foregroundColor: GemPalette.subtleText),
                     ),
                     TextButton.icon(
-                      onPressed: () => _open(SettingsScreen(storage: storage)),
+                      onPressed: () {
+                        SoundService.instance.play(Sfx.tap);
+                        _open(SettingsScreen(storage: storage));
+                      },
                       icon: const Icon(Icons.settings_rounded),
                       label: const Text('Settings'),
                       style: TextButton.styleFrom(

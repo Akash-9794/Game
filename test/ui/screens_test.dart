@@ -29,9 +29,14 @@ void main() {
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.widgetWithText(SwitchListTile, 'Vibration'));
     await tester.pumpAndSettle();
     expect(storage.haptics, isFalse);
+    expect(storage.sound, isTrue);
+
+    await tester.tap(find.widgetWithText(SwitchListTile, 'Sound effects'));
+    await tester.pumpAndSettle();
+    expect(storage.sound, isFalse);
 
     await tester.tap(find.text('Reset progress'));
     await tester.pumpAndSettle();
