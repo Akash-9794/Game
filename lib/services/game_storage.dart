@@ -6,17 +6,19 @@ import '../logic/adventure_progress.dart';
 /// Adventure stars and settings. Uses the phone's storage (or the browser's
 /// on web). If storage is unavailable, values live in memory only.
 class GameStorage {
-  GameStorage._(this._prefs, this.bestScore, this.progress, this.haptics);
+  GameStorage._(this._prefs, this.bestScore, this.progress, this.haptics, this.sound);
 
   static const _bestKey = 'classic_best_score';
   static const _progressKey = 'adventure_progress';
   static const _hapticsKey = 'haptics_enabled';
+  static const _soundKey = 'sound_enabled';
 
   final SharedPreferences? _prefs;
 
   int bestScore;
   AdventureProgress progress;
   bool haptics;
+  bool sound;
 
   static Future<GameStorage> load() async {
     try {
@@ -26,6 +28,7 @@ class GameStorage {
         prefs.getInt(_bestKey) ?? 0,
         AdventureProgress.decode(prefs.getStringList(_progressKey) ?? const []),
         prefs.getBool(_hapticsKey) ?? true,
+        prefs.getBool(_soundKey) ?? true,
       );
     } catch (_) {
       return GameStorage.memory();
@@ -34,7 +37,7 @@ class GameStorage {
 
   /// Storage that is never saved (used for tests or private browsing).
   factory GameStorage.memory() =>
-      GameStorage._(null, 0, AdventureProgress(), true);
+      GameStorage._(null, 0, AdventureProgress(), true, true);
 
   Future<void> _write(Future<bool> Function(SharedPreferences p) op) async {
     final p = _prefs;
@@ -62,6 +65,11 @@ class GameStorage {
   void setHaptics(bool on) {
     haptics = on;
     _write((p) => p.setBool(_hapticsKey, on));
+  }
+
+  void setSound(bool on) {
+    sound = on;
+    _write((p) => p.setBool(_soundKey, on));
   }
 
   /// Clears best score and Adventure progress (settings are kept).

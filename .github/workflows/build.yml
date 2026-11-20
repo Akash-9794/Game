@@ -3,6 +3,7 @@ name: Build
 on:
   push:
     branches: [main]
+  pull_request: # check changes before they are merged (no deploy)
   workflow_dispatch: # adds a "Run workflow" button on the Actions tab
 
 permissions:
@@ -61,10 +62,13 @@ jobs:
       # GitHub Pages serves this site at https://<user>.github.io/<repo-name>/
       - run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: build/web
 
   deploy-pages:
+    # Only publish the website from main, never from a pull request.
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: web
     runs-on: ubuntu-latest
     permissions:

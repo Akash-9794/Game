@@ -1,6 +1,13 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../game/gem_painter.dart';
+import '../services/sound_service.dart';
+
+/// Plays the button tap sound, then runs [action].
+void _tapThen(VoidCallback action) {
+  SoundService.instance.play(Sfx.tap);
+  action();
+}
 
 /// Small row of gems used as the game's logo.
 class GemLogo extends StatelessWidget {
@@ -132,7 +139,7 @@ class MenuButton extends StatelessWidget {
       elevation: 0,
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
+        onTap: onTap == null ? null : () => _tapThen(onTap!),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Row(
@@ -192,10 +199,11 @@ class PanelButton extends StatelessWidget {
       textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
     );
     return icon == null
-        ? FilledButton(style: style, onPressed: onPressed, child: Text(label))
+        ? FilledButton(
+            style: style, onPressed: () => _tapThen(onPressed), child: Text(label))
         : FilledButton.icon(
             style: style,
-            onPressed: onPressed,
+            onPressed: () => _tapThen(onPressed),
             icon: Icon(icon),
             label: Text(label));
   }
@@ -218,7 +226,7 @@ class ScreenHeader extends StatelessWidget {
             tooltip: 'Back',
             icon: const Icon(Icons.arrow_back_rounded),
             color: GemPalette.text,
-            onPressed: () => Navigator.of(context).maybePop(),
+            onPressed: () => _tapThen(() => Navigator.of(context).maybePop()),
           ),
           const SizedBox(width: 4),
           Expanded(

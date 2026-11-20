@@ -1,0 +1,14 @@
+# App icon settings. To change the icon: edit tools/make_icon.py, run it,
+# then run `dart run flutter_launcher_icons`.
+flutter_launcher_icons:
+  image_path: "assets/icon/icon.png"
+  android: true
+  ios: false
+  min_sdk_android: 21
+  adaptive_icon_background: "#12121C"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+  web:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    background_color: "#12121C"
+    theme_color: "#12121C"
