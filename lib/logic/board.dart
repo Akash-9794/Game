@@ -11,11 +11,15 @@ class PlaceResult {
   final int pointsGained;
   final int combo;
 
+  /// How many Adventure target gems were cleared by this placement.
+  final int clearedTargets;
+
   const PlaceResult({
     required this.clearedRows,
     required this.clearedCols,
     required this.pointsGained,
     required this.combo,
+    this.clearedTargets = 0,
   });
 
   int get clearedLines => clearedRows.length + clearedCols.length;
@@ -28,6 +32,9 @@ class Board {
   final List<List<int?>> _cells =
       List.generate(size, (_) => List<int?>.filled(size, null));
 
+  /// Cells holding Adventure target gems (must be cleared to win a level).
+  final Set<(int, int)> _targets = {};
+
   int score = 0;
 
   /// How many placements in a row have cleared at least one line.
@@ -37,6 +44,19 @@ class Board {
 
   /// The gem colour at a cell, or null if empty.
   int? gemAt(int row, int col) => _cells[row][col];
+
+  bool isTarget(int row, int col) => _targets.contains((row, col));
+
+  int get targetCount => _targets.length;
+
+  /// Puts a target gem on an empty cell (used when an Adventure level starts).
+  void addTarget(int row, int col, int gem) {
+    if (_cells[row][col] != null) {
+      throw ArgumentError('Cell ($row, $col) is not empty');
+    }
+    _cells[row][col] = gem;
+    _targets.add((row, col));
+  }
 
   bool canPlace(Shape shape, int row, int col) {
     for (final (r, c) in shape.cells) {
@@ -78,14 +98,17 @@ class Board {
     for (final (r, c) in shape.cells) {
       _cells[row + r][col + c] = gem;
     }
+    final targetsBefore = _targets.length;
     for (final r in fullRows) {
       for (var c = 0; c < size; c++) {
         _cells[r][c] = null;
+        _targets.remove((r, c));
       }
     }
     for (final c in fullCols) {
       for (var r = 0; r < size; r++) {
         _cells[r][c] = null;
+        _targets.remove((r, c));
       }
     }
 
@@ -99,6 +122,7 @@ class Board {
       clearedCols: fullCols,
       pointsGained: points,
       combo: combo,
+      clearedTargets: targetsBefore - _targets.length,
     );
   }
 

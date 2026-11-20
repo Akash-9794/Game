@@ -1,11 +1,11 @@
 {
-    "name": "gem_grid",
-    "short_name": "gem_grid",
+    "name": "Gem Grid",
+    "short_name": "Gem Grid",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#12121C",
+    "theme_color": "#12121C",
+    "description": "Gem Grid - a 9x9 block puzzle game.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

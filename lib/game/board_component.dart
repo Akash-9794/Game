@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 
-import '../logic/classic_game.dart';
+import '../logic/tray_game.dart';
 import 'gem_painter.dart';
 
 /// Where a dragged piece would land, for the preview.
@@ -20,8 +20,9 @@ class PlacementPreview {
 
 class _Burst {
   final int row, col, gem;
+  final bool target;
   double t = 1; // 1 → 0
-  _Burst(this.row, this.col, this.gem);
+  _Burst(this.row, this.col, this.gem, this.target);
 }
 
 /// Draws the 9x9 board from [Board] state. Rendering only.
@@ -43,14 +44,19 @@ class BoardComponent extends PositionComponent {
       position + Vector2(col * cellSize, row * cellSize);
 
   /// Plays the "pop" animation for cells that were just cleared.
-  void burst(List<(int, int, int)> cells) {
-    for (final (r, c, g) in cells) {
-      _bursts.add(_Burst(r, c, g));
+  void burst(List<(int, int, int, bool)> cells) {
+    for (final (r, c, g, target) in cells) {
+      _bursts.add(_Burst(r, c, g, target));
     }
   }
 
+  void clearAnimations() => _bursts.clear();
+
+  double _time = 0;
+
   @override
   void update(double dt) {
+    _time += dt;
     for (final b in _bursts) {
       b.t -= dt * 3;
     }
@@ -94,6 +100,9 @@ class BoardComponent extends PositionComponent {
           // Lines about to clear take the dragged piece's colour.
           drawGem(canvas, rect,
               GemPalette.gem(clearing ? p.piece.gem : gem));
+          if (board.isTarget(r, c)) {
+            drawTargetMark(canvas, rect, pulse: _time);
+          }
         } else if (previewCells.contains((r, c))) {
           drawGem(canvas, rect, GemPalette.gem(p!.piece.gem),
               opacity: clearing ? 0.9 : 0.4);
@@ -109,9 +118,9 @@ class BoardComponent extends PositionComponent {
     // Cleared cells shrink and fade away.
     for (final b in _bursts) {
       final shrink = (1 - b.t) * cellSize * 0.35;
-      drawGem(canvas, _cellRect(b.row, b.col, shrink: shrink),
-          GemPalette.gem(b.gem),
-          opacity: b.t);
+      final rect = _cellRect(b.row, b.col, shrink: shrink);
+      drawGem(canvas, rect, GemPalette.gem(b.gem), opacity: b.t);
+      if (b.target) drawTargetMark(canvas, rect, opacity: b.t);
     }
   }
 }
